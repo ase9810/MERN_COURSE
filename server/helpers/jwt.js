@@ -1,4 +1,5 @@
 const expressJwt = require("express-jwt");
+const { User } = require("../models/User");
 
 function authJwt() {
 	const secret = process.env.secret;
@@ -24,8 +25,10 @@ function authJwt() {
 }
 
 async function isRevoked(req, payload, done) {
-	if (!payload.isAdmin) {
-		done(null, true);
+	const user = await User.findById(payload.userId);
+
+	if (!user) {
+		return done(null, true);
 	}
 
 	done();
