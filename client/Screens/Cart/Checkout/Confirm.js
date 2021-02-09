@@ -19,7 +19,7 @@ const Confirm = (props) => {
 		axios
 			.post(`${baseURL}orders`, order)
 			.then((res) => {
-				if (res.status == 200 || res.status == 201) {
+				if (res.status === 200 || res.status === 201) {
 					Toast.show({
 						topOffset: 60,
 						type: "success",

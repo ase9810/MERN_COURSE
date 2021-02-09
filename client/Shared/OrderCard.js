@@ -19,7 +19,7 @@ const codes = [
 const OrderCard = (props) => {
 	const [orderStatus, setOrderStatus] = useState();
 	const [statusText, setStatusText] = useState();
-	const [statusChange, setStatusChange] = useState();
+	const [statusChange, setStatusChange] = useState(props.status);
 	const [token, setToken] = useState();
 	const [cardColor, setCardColor] = useState();
 
@@ -106,9 +106,10 @@ const OrderCard = (props) => {
 				<Text>Order Number: #{props.id}</Text>
 			</View>
 			<View style={{ marginTop: 10 }}>
-				<Text>
-					Status: {statusText} {orderStatus}
-				</Text>
+				<View style={{ flexDirection: "row" }}>
+					<Text>Status: {statusText}</Text>
+					{orderStatus}
+				</View>
 				<Text>
 					Address: {props.shippingAddress1} {props.shippingAddress2}
 				</Text>

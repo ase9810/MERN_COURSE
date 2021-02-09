@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Button } from "react-native";
+import React, { useCallback, useContext, useEffect, useState } from "react";
+import { View, Text, StyleSheet, ScrollView, Button, ActivityIndicator } from "react-native";
 import FormContainer from "../../Shared/Form/FormContainer";
 import Input from "../../Shared/Form/Input";
 import Error from "../../Shared/Error";
@@ -14,7 +14,8 @@ import axios from "axios";
 import baseURL from "../../assets/common/baseURL";
 import { logoutUser } from "../../Context/actions/Auth.actions";
 import Toast from "react-native-toast-message";
-// import { useFocusEffect } from "@react-navigation/native";
+import OrderCard from "../../Shared/OrderCard";
+import { useFocusEffect } from "@react-navigation/native";
 
 const Login = (props) => {
 	const context = useContext(AuthGlobal);
@@ -24,43 +25,40 @@ const Login = (props) => {
 
 	const [userProfile, setUserProfile] = useState();
 	const [orders, setOrders] = useState();
+	const [loading, setLoading] = useState(true);
 
-	// useFocusEffect(() => {
-	// 	if (context.stateUser.isAuthenticated === true) {
-	// 		props.navigation.navigate("User Profile");
-	// 	}
-	// }, [context.stateUser.isAuthenticated]);
+	useFocusEffect(
+		useCallback(() => {
+			if (context.stateUser.isAuthenticated) {
+				AsyncStorage.getItem("jwt")
+					.then((res) => {
+						axios
+							.get(`${baseURL}users/${context.stateUser.user.userId}`, {
+								headers: { Authorization: `Bearer ${res}` },
+							})
+							.then((user) => setUserProfile(user.data))
+							.catch((err) => console.log(err));
+					})
+					.catch((error) => console.log(error));
 
-	console.log(context.stateUser.isAuthenticated);
+				axios
+					.get(`${baseURL}orders`)
+					.then((x) => {
+						const data = x.data;
+						const userOrders = data.filter((order) => order.user._id === context.stateUser.user.userId);
+						setOrders(userOrders);
+						setLoading(false);
+					})
+					.catch((error) => console.log(error));
 
-	useEffect(() => {
-		if (context.stateUser.isAuthenticated) {
-			AsyncStorage.getItem("jwt")
-				.then((res) => {
-					axios
-						.get(`${baseURL}users/${context.stateUser.user.userId}`, {
-							headers: { Authorization: `Bearer ${res}` },
-						})
-						.then((user) => setUserProfile(user.data))
-						.catch((err) => console.log(err));
-				})
-				.catch((error) => console.log(error));
-
-			axios
-				.get(`${baseURL}orders`)
-				.then((x) => {
-					const data = x.data;
-					const userOrders = data.filter((order) => order.user._id === context.stateUser.user.userId);
-					setOrders(userOrders);
-				})
-				.catch((error) => console.log(error));
-
-			return () => {
-				setUserProfile();
-				setOrders();
-			};
-		}
-	}, [context.stateUser.isAuthenticated]);
+				return () => {
+					setUserProfile();
+					setOrders();
+					setLoading(true);
+				};
+			}
+		}, [])
+	);
 
 	const handleSubmit = () => {
 		const user = {
@@ -109,20 +107,24 @@ const Login = (props) => {
 								]}
 							/>
 						</View>
-						<View style={styles.order}>
-							<Text style={{ fontSize: 20 }}>My Orders</Text>
-							<View>
-								{orders ? (
-									orders.map((x) => {
-										return <OrderCard key={x.id} {...x} />;
-									})
-								) : (
-									<View style={styles.order}>
-										<Text>You have no orders</Text>
-									</View>
-								)}
+						{!loading ? (
+							<View style={styles.order}>
+								<Text style={{ fontSize: 20 }}>My Orders</Text>
+								<View>
+									{orders ? (
+										orders.map((x) => {
+											return <OrderCard key={x.id} {...x} />;
+										})
+									) : (
+										<View style={styles.order}>
+											<Text>You have no orders</Text>
+										</View>
+									)}
+								</View>
 							</View>
-						</View>
+						) : (
+							<ActivityIndicator size="large" color="red" />
+						)}
 					</ScrollView>
 				</Container>
 			) : (
