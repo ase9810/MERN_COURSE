@@ -26,9 +26,11 @@ const Login = (props) => {
 	const [userProfile, setUserProfile] = useState();
 	const [orders, setOrders] = useState();
 	const [loading, setLoading] = useState(true);
+	const [focus, setFocus] = useState(true)
 
 	useFocusEffect(
 		useCallback(() => {
+			setFocus(false)
 			if (context.stateUser.isAuthenticated) {
 				AsyncStorage.getItem("jwt")
 					.then((res) => {
@@ -55,9 +57,10 @@ const Login = (props) => {
 					setUserProfile();
 					setOrders();
 					setLoading(true);
+					setFocus(true)
 				};
 			}
-		}, [])
+		}, [focus])
 	);
 
 	const handleSubmit = () => {
@@ -80,6 +83,9 @@ const Login = (props) => {
 			props.navigation.navigate("Home");
 		}
 	};
+
+	console.log(context.stateUser.userProfile);
+	console.log(userProfile);
 
 	return (
 		<>
