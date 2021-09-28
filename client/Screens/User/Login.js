@@ -16,7 +16,7 @@ import EasyButton from "../../Shared/StyledComponents/EasyButton";
 import AuthGlobal from "../../Context/store/AuthGlobal";
 import { loginUser } from "../../Context/actions/Auth.actions";
 import { Container } from "native-base";
-import AsyncStorage from "@react-native-community/async-storage";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import baseURL from "../../assets/common/baseURL";
 import { logoutUser } from "../../Context/actions/Auth.actions";
